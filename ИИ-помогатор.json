@@ -1,0 +1,1310 @@
+{
+  "name": "ИИ-помогатор",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        -240
+      ],
+      "id": "3d13f762-b690-4d9d-94d6-8d1a5afc866b",
+      "name": "Telegram Trigger",
+      "webhookId": "04834772-ba06-463d-b9b8-b8465cda5f09",
+      "credentials": {
+        "telegramApi": {
+          "id": "tjnLWPKM9uQdCYQB",
+          "name": "ИИ-помогатор"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Telegram Trigger').item.json.message.document.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1248,
+        -96
+      ],
+      "id": "0ee46dfc-0782-4117-9047-a1eed4e6aabc",
+      "name": "Get a file",
+      "webhookId": "55e467b4-adba-47d3-841b-5d5bfe9dd920",
+      "credentials": {
+        "telegramApi": {
+          "id": "tjnLWPKM9uQdCYQB",
+          "name": "ИИ-помогатор"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloud.llamaindex.ai/api/v1/parsing/upload",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer llx-bG1KIiXvtMITiaAf0noTOnckjEbRXp4IuAZ2vhCPG5h41Qd9"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1504,
+        -96
+      ],
+      "id": "aa95591d-70bc-4f5f-b902-38cf3a7b0a15",
+      "name": "Upload to LlamaParse"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.cloud.llamaindex.ai/api/v1/parsing/job/{{ $json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer llx-bG1KIiXvtMITiaAf0noTOnckjEbRXp4IuAZ2vhCPG5h41Qd9"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1696,
+        -96
+      ],
+      "id": "bed3fa22-4565-443c-8bbe-0504e1eb17c1",
+      "name": "Get Processing Status"
+    },
+    {
+      "parameters": {
+        "content": "## EXTRACT INFO (LLAMA CLOUDE)\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 544,
+        "width": 960,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1424,
+        -272
+      ],
+      "typeVersion": 1,
+      "id": "a21843db-2a1b-48e6-8893-062c63dd83e5",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "SUCCESS",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "9b7a82f2-7bcb-4639-881f-745607f8ca20"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SUCCESS"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a26fbc97-95b9-4439-ba4a-e59e10652ada",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "ERROR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ERROR"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "0cf7ebed-d850-4a09-8f1b-e4a1eecc9706",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "CANCELED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "CANCELED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "fc9040cb-9769-4a0c-a32e-02c364c2357d",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "PENDING",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PENDING"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1904,
+        -128
+      ],
+      "id": "acb80789-d237-425d-9e4e-e774ee469d98",
+      "name": "Is Job Ready?"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.cloud.llamaindex.ai/api/v1/parsing/job/{{ $json.id }}/result/markdown",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer llx-bG1KIiXvtMITiaAf0noTOnckjEbRXp4IuAZ2vhCPG5h41Qd9"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2192,
+        -240
+      ],
+      "id": "777ab5da-121a-4036-aba9-31535c9b2990",
+      "name": "Get Parsed Resume"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2192,
+        64
+      ],
+      "id": "16818817-d30e-476f-8ba7-6e187d8c4651",
+      "name": "Wait to stay within service limits",
+      "webhookId": "0fcb282f-77dd-4acd-8bd3-bf32f8889e77"
+    },
+    {
+      "parameters": {
+        "model": "nex-agi/deepseek-v3.1-nex-n1:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        2608,
+        144
+      ],
+      "id": "fca376df-6c57-413c-ac91-e876d2a0041b",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "ep1zy54acrRfH1bY",
+          "name": "OpenRouter"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ \n  // Выход 0: Документ \"правильного\" типа\n  $json.message.document && ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'text/markdown'].includes($json.message.document.mime_type) ? 0 : \n  // Выход 1: Команда /start\n  $json.message.text && $json.message.text.toLowerCase() === '/start' ? 1 : \n  // Выход 2: Команда /help\n  $json.message.text && $json.message.text.toLowerCase() === '/help' ? 2 : \n  // Выход 3: Всё остальное (ошибка типа или другие сообщения)\n  3\n}}"
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        688,
+        -256
+      ],
+      "id": "890d1aeb-f33b-42aa-bb9d-42d26ed6e148",
+      "name": "Checking the file type"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "985bb8bf-5e65-4259-b4b5-990c10942651",
+              "name": "telegram_file_id",
+              "value": "={{ $json.message.document.file_id }}",
+              "type": "string"
+            },
+            {
+              "id": "27c222cb-ec39-4361-b10e-85949594863e",
+              "name": "file_name",
+              "value": "={{ $json.message.document.file_name }}",
+              "type": "string"
+            },
+            {
+              "id": "06e2c17c-cd38-448b-8eab-80457cedf9e4",
+              "name": "file_size",
+              "value": "={{ $json.message.document.file_size }}",
+              "type": "number"
+            },
+            {
+              "id": "93061450-bb5b-4512-bdbc-6c8c392e7569",
+              "name": "mime_type",
+              "value": "={{ $json.message.document.mime_type }}",
+              "type": "string"
+            },
+            {
+              "id": "b01575ea-5d76-4965-8c42-1903c1ce75de",
+              "name": "language",
+              "value": "={{ $json.message.from.language_code }}",
+              "type": "string"
+            },
+            {
+              "id": "a81975c3-8c7c-44f1-b6cf-050d7fc4522a",
+              "name": "uploader_name",
+              "value": "={{ $json.message.from.first_name }}",
+              "type": "string"
+            },
+            {
+              "id": "1b95e1ba-048b-43ba-ad47-d84c9e7a044f",
+              "name": "timestamp",
+              "value": "={{ $json.message.date }}",
+              "type": "number"
+            },
+            {
+              "id": "67ab4493-0694-4b4a-ac91-109b0633eb96",
+              "name": "file_type",
+              "value": "={{   {     'application/pdf': 'PDF',     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'DOCX',     'text/plain': 'TXT',     'text/markdown': 'MD'   }[$json.message.document.mime_type] || 'OTHER' }}",
+              "type": "string"
+            },
+            {
+              "id": "46220687-a64a-486e-9c2b-42f659be85b3",
+              "name": "telegram_chat_id",
+              "value": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+              "type": "string"
+            },
+            {
+              "id": "73ddace7-1f71-480d-b878-32fadb650f2c",
+              "name": "telegram_message_id",
+              "value": "={{ $('Telegram Trigger').item.json.message.message_id }}",
+              "type": "string"
+            },
+            {
+              "id": "15121637-46ee-49cd-b14f-9f4a8dceaaa2",
+              "name": "uploader_id",
+              "value": "={{ $json.message.from.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1024,
+        -432
+      ],
+      "id": "dba35d88-a492-4e61-ad0c-a1be715ff28a",
+      "name": "Memorize metadata"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Get Parsed Resume').item.json.markdown }}",
+        "options": {
+          "systemMessage": "Ты — профессиональный ии-помощник для анализа документов, который структурирует информацию, твои задачи:.\n\n1. СУММАРИЗАЦИЯ: сделай краткую, связную выжимку на 3-7 предложений, сохранив основную структуру, выдели основную цель, ключевые тезисы и выводы документа.\n2. КЛЮЧЕВЫЕ СЛОВА: выдели 5-10 наиболее релевантных ключевых слов или коротких фраз, отражающих суть документа, через запятую.\n\nТЕКСТ ДЛЯ АНАЛИЗА:\n{{ $json.markdown }}\n\nВЕРНИ ОТВЕТ СТРОГО В СЛЕДУЮЩЕМ ФОРМАТЕ::\nСуммаризация: [твой текст здесь]\nКлючевые слова: [слова или фразы через запятую]"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2608,
+        -48
+      ],
+      "id": "356ff2d6-f5eb-410c-a4dc-e30a009254b6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3088,
+        -416
+      ],
+      "id": "4d7d4ebe-a3fb-4a12-93bb-d61f67cb84b7",
+      "name": "Merge metadata with summarization"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nif (!items || items.length === 0) {\n  return [];\n}\n\nconst item = items[0];\nif (!item.json || !item.json.output) {\n  // Если нет поля output, возвращаем данные как есть\n  return items;\n}\n\nconst fullText = String(item.json.output);\nconst keywordMarker = \"Ключевые слова:\";\nconst keywordIndex = fullText.indexOf(keywordMarker);\nlet summaryText = \"\";\nlet keywordText = \"\";\n\nif (keywordIndex !== -1) {\n  summaryText = fullText.substring(0, keywordIndex).replace(\"Суммаризация:\", \"\").trim();\n  keywordText = fullText.substring(keywordIndex + keywordMarker.length).trim();\n} else {\n  summaryText = fullText.replace(\"Суммаризация:\", \"\").trim();\n  keywordText = \"Не удалось извлечь\";\n}\n\nitem.json.summary = summaryText;\nitem.json.keywords = keywordText;\n\nif (keywordText && keywordText !== \"Не удалось извлечь\") {\n  const keywordsArray = keywordText.split(',').map(k => k.trim()).filter(k => k.length > 0);\n  item.json.keywords_count = keywordsArray.length;\n  item.json.keywords_array = keywordsArray;\n} else {\n  item.json.keywords_count = 0;\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2896,
+        -48
+      ],
+      "id": "e57267a4-59f7-4af9-8980-706e86ef4e2c",
+      "name": "Splitting the response"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nif (!items || items.length === 0) {\n  return items;\n}\n\nconst item = items[0];\nconst timestamp = item.json.timestamp;\n\nif (timestamp) {\n  const date = new Date(timestamp * 1000)\n  const formattedDate = date.toLocaleDateString('ru-RU', {\n    year: 'numeric',\n    month: '2-digit',\n    day: '2-digit'\n  });\n  const formattedTime = date.toLocaleTimeString('ru-RU', {\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit'\n  });\n  item.json.formatted_date = formattedDate;  // \"14.03.2024\"\n  item.json.formatted_time = formattedTime;  // \"15:30:25\"\n  item.json.formatted_datetime = `${formattedDate} ${formattedTime}`; // полная\n} else {\n  item.json.formatted_date = 'Не указано';\n  item.json.formatted_time = 'Не указано';\n  item.json.formatted_datetime = 'Не указано';\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        -432
+      ],
+      "id": "35592c29-618d-48aa-b83e-e8b2e6ed814d",
+      "name": "Timestamp Formatter"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nif (!items || items.length === 0) {\n  return items;\n}\n\nconst item = items[0];\nconst bytes = item.json.file_size;\n\nif (bytes) {\n  const units = ['байт', 'КБ', 'МБ', 'ГБ'];\n  let size = bytes;\n  let unitIndex = 0;\n  while (size >= 1024 && unitIndex < units.length - 1) {\n    size /= 1024;\n    unitIndex++;\n  }\n  const formattedSize = unitIndex === 0 \n    ? Math.round(size) \n    : Math.round(size * 100) / 100;\n  item.json.formatted_size = `${formattedSize} ${units[unitIndex]}`;\n} else {\n  item.json.formatted_size = 'Неизвестно';\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        -432
+      ],
+      "id": "c9761e3d-df57-422e-beaf-01599dd9134d",
+      "name": "File Size Formatter"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=<b>📄 Отправьте документ, пожалуйста</b>. Я понимаю только документы в форматах: PDF, DOCX (Word), TXT, MD (Markdown). \n\nЕсли вы отправили команду, то используйте: /start - приветствие, /help - справка.",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        480
+      ],
+      "id": "b74e2374-610f-4d3a-8a38-bdd9c3092d02",
+      "name": "Send a message about a data type error",
+      "webhookId": "1ca20288-9287-4d89-b687-43ee71cc9f1c",
+      "credentials": {
+        "telegramApi": {
+          "id": "tjnLWPKM9uQdCYQB",
+          "name": "ИИ-помогатор"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "Файл получен. Начинаю обработку...",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        -96
+      ],
+      "id": "6ca5f0ef-bb86-487f-8636-c58acd95b6e7",
+      "name": "Send a message about the successful receipt",
+      "webhookId": "bd5c4e4f-f448-4f31-b57a-2a3c437a4d7a",
+      "credentials": {
+        "telegramApi": {
+          "id": "tjnLWPKM9uQdCYQB",
+          "name": "ИИ-помогатор"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=<b>Анализ документа завершен</b>\n\n<b>Метаданные документа:</b>\n  • Файл: {{ $json.file_name }}\n  • Тип: {{ $json.file_type }}\n  • Размер: {{ $json.formatted_size }}\n  • Отправитель: {{ $json.uploader_name }}\n  • Дата загрузки: {{ $json.formatted_date }}\n  • Время загрузки: {{ $json.formatted_time }}\n  • Язык пользователя: {{ $json.language }}\n  • Язык документа: {{ $json.document_language }}\n\n📝 <b>Краткое содержание:</b>\n{{ $json.summary }}\n\n🏷️ <b>Ключевые слова:</b>\n{{ $json.keywords}}\n\n✅ <i>Результаты сохранены в базу знаний (Google Sheets).</i>",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3600,
+        -224
+      ],
+      "id": "ee29b31b-0e5a-440a-94a6-a27b5e7e0b73",
+      "name": "Send a text message",
+      "webhookId": "c90eb7bc-d362-448c-9757-8c837bf6a34f",
+      "credentials": {
+        "telegramApi": {
+          "id": "tjnLWPKM9uQdCYQB",
+          "name": "ИИ-помогатор"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "К сожалению, не удалось обработать документ. Попробуйте ещё раз!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2192,
+        -96
+      ],
+      "id": "af79b6af-baaa-4d21-a3a0-1f4ba5b12367",
+      "name": "Send a file processing error message",
+      "webhookId": "eaa05b42-897f-4e16-bbd8-db68161d537c",
+      "credentials": {
+        "telegramApi": {
+          "id": "tjnLWPKM9uQdCYQB",
+          "name": "ИИ-помогатор"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=🤖 Добро пожаловать в ИИ-помогатор! Я помогу вам построить базу знаний из документов.  \n\n<b>Как это работает:</b> \n1. Отправьте мне документ в формате:    \n  • PDF    \n  • DOCX (Word)    \n  • TXT    \n  • MD (Markdown) \n2. Я извлеку текст, проанализирую его \n3. Создам краткое содержание и выделю ключевые слова \n4. Сохрану всё в базу знаний (Google Sheets)\n\n<b>Команды:</b> \n/start - это сообщение  \n/help - подробная инструкция\n\nПросто отправьте мне документ — и я начну работу!",
+        "replyMarkup": "inlineKeyboard",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        112
+      ],
+      "id": "0eaf5e44-cd18-422c-9aaf-a49301efbde2",
+      "name": "Send welcome message",
+      "webhookId": "1ca20288-9287-4d89-b687-43ee71cc9f1c",
+      "credentials": {
+        "telegramApi": {
+          "id": "tjnLWPKM9uQdCYQB",
+          "name": "ИИ-помогатор"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nif (!items || items.length === 0) {\n  return [];\n}\n\nconst item = items[0];\nconst text = item.json.markdown || '';\nconst cleanText = text.replace(/[#*`\\[\\]()]/g, '').replace(/\\n/g, ' ');\n\nfunction detectDocumentLanguage(text) {\n  if (text.length < 20) {\n    return {\n      language: 'Text too short for detection',\n      code: 'short',\n      confidence: 0\n    };\n  }\n  const cyrillicChars = (text.match(/[а-яА-ЯёЁ]/g) || []).length;\n  const latinChars = (text.match(/[a-zA-Z]/g) || []).length;\n  const totalChars = cyrillicChars + latinChars;\n  if (totalChars === 0) {\n    return {\n      language: 'No letters found',\n      code: 'no_letters',\n      confidence: 0\n    };\n  }\n  const cyrillicPercent = Math.round((cyrillicChars / totalChars) * 100);\n  const latinPercent = Math.round((latinChars / totalChars) * 100);\n  if (cyrillicPercent >= 70) {\n    return {\n      language: 'Russian',\n      code: 'ru',\n      confidence: cyrillicPercent\n    };\n  } else if (latinPercent >= 70) {\n    return {\n      language: 'English',\n      code: 'en',\n      confidence: latinPercent\n    };\n  } else if (cyrillicPercent >= 30 && latinPercent >= 30) {\n    return {\n      language: 'Mixed (Russian/English)',\n      code: 'mixed',\n      confidence: Math.min(cyrillicPercent, latinPercent)\n    };\n  } else {\n    return {\n      language: 'Unknown/Other',\n      code: 'other',\n      confidence: Math.max(cyrillicPercent, latinPercent)\n    };\n  }\n}\n\nconst langResult = detectDocumentLanguage(cleanText);\n\nitem.json.document_language = langResult.language;\nitem.json.document_language_code = langResult.code;\nitem.json.document_language_confidence = langResult.confidence;\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2432,
+        -240
+      ],
+      "id": "2df476b0-eb44-454f-a397-a47f7cb519f3",
+      "name": "Detect Document Language"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all()\nconst item = items[0]\n\nitem.json.telegram_reference = `Message ${item.json.telegram_message_id} in chat ${item.json.telegram_chat_id}`;\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        -432
+      ],
+      "id": "6b52a2b2-b9ae-45ca-aa7b-070a5725e955",
+      "name": "Link generator"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "10ArBVh8MgMGRe3UPAyx4S6sMSQlhacJe9GJcaXFc7t4"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Контент",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10ArBVh8MgMGRe3UPAyx4S6sMSQlhacJe9GJcaXFc7t4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "summary": "={{ $json.summary }}",
+            "keywords": "={{ $json.keywords }}",
+            "telegram_reference": "={{ $json.telegram_reference }}",
+            "file_id": "={{ $json.telegram_file_id }}",
+            "keywords_count": "={{ $json.keywords_count }}",
+            "processing_time_sec": "={{ $json.processing_time_display }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "file_id",
+              "displayName": "file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "keywords",
+              "displayName": "keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "keywords_count",
+              "displayName": "keywords_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "processing_time_sec",
+              "displayName": "processing_time_sec",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "telegram_reference",
+              "displayName": "telegram_reference",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3600,
+        -400
+      ],
+      "id": "6cdfd0e0-577e-4063-8f70-f51598b2422a",
+      "name": "Append content row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "QStaIfyXEqLbbwVN",
+          "name": "Google Sheets - pomogator OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "10ArBVh8MgMGRe3UPAyx4S6sMSQlhacJe9GJcaXFc7t4"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1777340426,
+          "mode": "list",
+          "cachedResultName": "Данные файла",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10ArBVh8MgMGRe3UPAyx4S6sMSQlhacJe9GJcaXFc7t4/edit#gid=1777340426"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "file_id": "={{ $json.telegram_file_id }}",
+            "telegram_chat_id": "={{ $json.telegram_chat_id }}",
+            "telegram_message_id": "={{ $json.telegram_message_id }}",
+            "uploader_id": "={{ $json.uploader_id }}",
+            "file_name": "={{ $json.file_name }}",
+            "file_type": "={{ $json.file_type }}",
+            "file_size_bytes": "={{ $json.file_size }}",
+            "timestamp_unix": "={{ $json.timestamp }}",
+            "formatted_datetime": "={{ $json.formatted_datetime }}",
+            "user_language": "={{ $json.language }}",
+            "document_language": "={{ $json.document_language_code }}",
+            "language_confidence": "={{ $json.document_language_confidence }}",
+            "word_count": "={{ $json.word_count }}",
+            "char_count": "={{ $json.char_count }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "telegram_chat_id",
+              "displayName": "telegram_chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "telegram_message_id",
+              "displayName": "telegram_message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "uploader_id",
+              "displayName": "uploader_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "file_id",
+              "displayName": "file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "file_name",
+              "displayName": "file_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "file_type",
+              "displayName": "file_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "file_size_bytes",
+              "displayName": "file_size_bytes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "timestamp_unix",
+              "displayName": "timestamp_unix",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "formatted_datetime",
+              "displayName": "formatted_datetime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "user_language",
+              "displayName": "user_language",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "document_language",
+              "displayName": "document_language",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "language_confidence",
+              "displayName": "language_confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "word_count",
+              "displayName": "word_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "char_count",
+              "displayName": "char_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3600,
+        -576
+      ],
+      "id": "826b33bd-71fb-49bb-bc05-a373edbe27e8",
+      "name": "Append data row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "QStaIfyXEqLbbwVN",
+          "name": "Google Sheets - pomogator OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nif (!items || items.length === 0) return [];\n\nconst item = items[0];\nconst text = item.json.markdown || '';\nconst cleanText = text.trim().replace(/\\s+/g, ' ');\nconst words = cleanText.split(' ').filter(word => word.length > 0);\nitem.json.word_count = words.length;\nitem.json.char_count = text.length;\nitem.json.char_count_no_spaces = text.replace(/\\s/g, '').length;\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2592,
+        -240
+      ],
+      "id": "71538020-3912-41e0-934b-469d224248b4",
+      "name": "Count Words & Chars"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst item = items[0];\nconst startTimeSec = item.json.timestamp;\nconst endTimeSec = Math.floor(Date.now() / 1000);\nitem.json.processing_time_sec = (endTimeSec - startTimeSec).toFixed(2);\n\nif (item.json.processing_time_sec < 60) {\n  item.json.processing_time_display = `${item.json.processing_time_sec} сек`;\n} else {\n  const minutes = Math.floor(item.json.processing_time_sec / 60);\n  const seconds = (item.json.processing_time_sec % 60).toFixed(0);\n  item.json.processing_time_display = `${minutes} мин ${seconds} сек`;\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3248,
+        -400
+      ],
+      "id": "a868a650-2bd4-445f-8734-69ca2dc5f56f",
+      "name": "Calculate Total Processing Time"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=<b>🤖 Подробная инструкция по ИИ-помогатору</b>\n\n<b>Назначение:</b>\nЯ автоматически строю базу знаний из ваших документов. Отправьте резюме, статьи, отчёты — я проанализирую и сохрану ключевую информацию.\n\n<b>Что получите на выходе:</b>\n✅ Краткое содержание (3-7 предложений)\n✅ Ключевые слова/фразы (5-10 штук)\n✅ Метаданные документа (размер, язык, отправитель)\n✅ Автоматическое сохранение в Google Sheets\n\n<b>Поддерживаемые форматы:</b>\n  • Документы: PDF, DOCX (Word), TXT, MD (Markdown)\n  • Макс. размер: 20 МБ\n\n<b>Процесс обработки в среднем:</b>\n  1. Получение файла (мгновенно)\n  2. Извлечение текста (5-15 секунд)\n  3. Анализ ИИ (3-7 секунд)\n  4. Сохранение результатов (2-3 секунда)\n<i>Общее время: ~10-25 секунд</i>\n\n<b>Команды:</b>\n/start — приветствие и быстрый старт\n/help — эта подробная инструкция\n\n<b>🛠 Технологический стек:</b>\n  • Оркестрация: n8n (low-code платформа)\n  • Парсинг документов: LlamaParse API\n  • ИИ-анализ: OpenRouter\n  • Хранение: Google Sheets \n\n<b>💡 Советы по использованию:</b>\n  • Для больших документов (50+ страниц) время обработки увеличивается\n  • Все данные сохраняются анонимно, ID чата используется только для связи\n\n<i>Вопросы/проблемы: проверьте формат файла или отправьте повторно</i>",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        288
+      ],
+      "id": "f483f6e6-2312-4b13-9fd4-6ad0704d6b67",
+      "name": "Send help message",
+      "webhookId": "1ca20288-9287-4d89-b687-43ee71cc9f1c",
+      "credentials": {
+        "telegramApi": {
+          "id": "tjnLWPKM9uQdCYQB",
+          "name": "ИИ-помогатор"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "editMessageText",
+        "chatId": "={{ $('Send a message about the successful receipt').item.json.result.chat.id }}",
+        "messageId": "={{ $('Send a message about the successful receipt').item.json.result.message_id }}",
+        "text": "Текст успешно извлечен. Анализирую содержимое...",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2448,
+        -48
+      ],
+      "id": "6d7413d4-f3e0-442a-83e1-144625741624",
+      "name": "Edit the processing status message",
+      "webhookId": "f2489b9f-8e9c-4222-b9ed-9d6afbb5b5eb",
+      "credentials": {
+        "telegramApi": {
+          "id": "tjnLWPKM9uQdCYQB",
+          "name": "ИИ-помогатор"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Checking the file type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Upload to LlamaParse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to LlamaParse": {
+      "main": [
+        [
+          {
+            "node": "Get Processing Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Processing Status": {
+      "main": [
+        [
+          {
+            "node": "Is Job Ready?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Job Ready?": {
+      "main": [
+        [
+          {
+            "node": "Get Parsed Resume",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a file processing error message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a file processing error message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait to stay within service limits",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Parsed Resume": {
+      "main": [
+        [
+          {
+            "node": "Edit the processing status message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Detect Document Language",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait to stay within service limits": {
+      "main": [
+        [
+          {
+            "node": "Get Processing Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Checking the file type": {
+      "main": [
+        [
+          {
+            "node": "Send a message about the successful receipt",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Memorize metadata",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send welcome message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send help message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message about a data type error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memorize metadata": {
+      "main": [
+        [
+          {
+            "node": "File Size Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Splitting the response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge metadata with summarization": {
+      "main": [
+        [
+          {
+            "node": "Calculate Total Processing Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Splitting the response": {
+      "main": [
+        [
+          {
+            "node": "Merge metadata with summarization",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Timestamp Formatter": {
+      "main": [
+        [
+          {
+            "node": "Link generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Size Formatter": {
+      "main": [
+        [
+          {
+            "node": "Timestamp Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message about the successful receipt": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect Document Language": {
+      "main": [
+        [
+          {
+            "node": "Count Words & Chars",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Link generator": {
+      "main": [
+        [
+          {
+            "node": "Merge metadata with summarization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Count Words & Chars": {
+      "main": [
+        [
+          {
+            "node": "Merge metadata with summarization",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Calculate Total Processing Time": {
+      "main": [
+        [
+          {
+            "node": "Append data row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append content row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit the processing status message": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "saveDataSuccessExecution": "none",
+    "saveExecutionProgress": false,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "a96389eb-e348-4237-94ea-2f31016cf146",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bfcde3225c9781e7bb080235a551c3e35139d826ac082adcc48981a6aa62820e"
+  },
+  "id": "K1yWbzDQL2sEgcJn",
+  "tags": []
+}
